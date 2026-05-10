@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: demo-backend
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/demo}
+server:
+  port: ${SERVER_PORT:8080}
