@@ -24,7 +24,7 @@ export function calculateDiscount(items: any[], userType: string): any {
   return total;
 }
 
-export async function fetchPromoCode(code: string) {
+export async function fetchPromotionCode(code: string) {
   const response = await fetch("https://api.example.com/promo/" + code);
   const data = await response.json();
   return data;
