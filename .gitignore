@@ -9,3 +9,8 @@ test-results/
 .env
 .idea/
 .vscode/
+
+# Claude Code local state
+.claude/
+# /deliver workflow run artefacts (test contracts, plans, reviews, audits)
+artifacts/
