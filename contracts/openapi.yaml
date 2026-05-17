@@ -53,6 +53,12 @@ paths:
             schema:
               $ref: "#/components/schemas/BindRequest"
       responses:
+        "200":
+          description: Policy already bound for this quote (idempotent replay)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Policy"
         "201":
           description: Policy bound
           content:
@@ -110,19 +116,27 @@ components:
       properties:
         driverName:
           type: string
+          minLength: 1
+          maxLength: 100
           example: Alex Driver
         dateOfBirth:
           type: string
           format: date
+          description: ISO-8601 date; must be in the past
           example: "1995-06-12"
         licenceNumber:
           type: string
+          pattern: '^[A-Z0-9]{16}$'
           example: DRIVE701054AB9XY
         postcode:
           type: string
+          pattern: '^[A-Z]{1,2}[0-9][A-Z0-9]?(\s*[0-9][A-Z]{2})?$'
+          description: UK postcode; outward portion (e.g. "E14") sufficient for eligibility
           example: E14 5AB
         vehicleRef:
           type: string
+          minLength: 1
+          maxLength: 32
           description: Vehicle registration plate or VIN
           example: AB12 CDE
     QuoteResponse:
@@ -135,9 +149,10 @@ components:
           type: string
           example: 65f1a2c3d4e5f60718293a4b
         premium:
-          type: number
-          format: double
-          example: 550.00
+          type: string
+          format: decimal
+          description: Decimal premium in GBP, fixed-precision string to avoid IEEE-754 drift
+          example: "550.00"
     BindRequest:
       type: object
       required:
@@ -162,9 +177,10 @@ components:
           type: string
           example: 65f1a2c3d4e5f60718293a4b
         premium:
-          type: number
-          format: double
-          example: 550.00
+          type: string
+          format: decimal
+          description: Decimal premium in GBP, fixed-precision string to avoid IEEE-754 drift
+          example: "550.00"
         effectiveFrom:
           type: string
           format: date

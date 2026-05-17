@@ -10,12 +10,13 @@ export type QuoteRequest = {
   vehicleRef: string;
 };
 
-export type QuoteResponse = { quoteId: string; premium: number };
+// premium is a decimal string (e.g. "550.00") to avoid IEEE-754 drift on money.
+export type QuoteResponse = { quoteId: string; premium: string };
 
 export type Policy = {
   policyId: string;
   quoteId: string;
-  premium: number;
+  premium: string;       // decimal string, see QuoteResponse.premium
   effectiveFrom: string; // ISO date
   effectiveTo: string;   // ISO date
 };

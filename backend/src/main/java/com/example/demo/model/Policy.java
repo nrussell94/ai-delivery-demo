@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ public class Policy {
     @Id
     private String id;
 
+    @Indexed(unique = true)
     private String quoteId;
 
     private BigDecimal premium;

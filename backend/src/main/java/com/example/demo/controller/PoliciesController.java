@@ -19,8 +19,9 @@ public class PoliciesController implements PoliciesApi {
 
     @Override
     public ResponseEntity<Policy> bindPolicy(BindRequest bindRequest) {
-        Policy policy = policyService.bind(bindRequest.getQuoteId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(policy);
+        PolicyService.BindResult result = policyService.bind(bindRequest.getQuoteId());
+        HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(result.policy());
     }
 
     @Override

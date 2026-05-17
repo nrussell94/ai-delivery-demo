@@ -14,11 +14,13 @@ export default function App() {
   const [quoteError, setQuoteError] = useState<string | null>(null);
 
   const [binding, setBinding] = useState(false);
+  const [bindError, setBindError] = useState<string | null>(null);
   const [policy, setPolicy] = useState<Policy | null>(null);
 
   async function handleGetQuote() {
     setQuoting(true);
     setQuoteError(null);
+    setBindError(null);
     setQuote(null);
     setPolicy(null);
     try {
@@ -34,11 +36,12 @@ export default function App() {
   async function handleBindPolicy() {
     if (!quote) return;
     setBinding(true);
+    setBindError(null);
     try {
       const result = await bindPolicy(quote.quoteId);
       setPolicy(result);
     } catch (err) {
-      setQuoteError(err instanceof Error ? err.message : 'The API request failed');
+      setBindError(err instanceof Error ? err.message : 'The API request failed');
     } finally {
       setBinding(false);
     }
@@ -102,11 +105,14 @@ export default function App() {
             <Alert severity="error">{quoteError}</Alert>
           )}
 
-          {quote && !quoteError && (
+          {quote && !quoteError && !policy && (
             <Paper sx={{ p: 3, borderRadius: 2 }}>
               <Stack spacing={2}>
                 <Typography variant="h6">Quote</Typography>
                 <Typography>Premium: £{quote.premium}</Typography>
+                {bindError && (
+                  <Alert severity="error">{bindError}</Alert>
+                )}
                 <Button
                   variant="outlined"
                   onClick={handleBindPolicy}
@@ -124,6 +130,7 @@ export default function App() {
               <Stack spacing={1}>
                 <Typography variant="h6">Policy</Typography>
                 <Typography>Policy ID: {policy.policyId}</Typography>
+                <Typography>Premium: £{policy.premium}</Typography>
                 <Typography>Effective: {policy.effectiveFrom} → {policy.effectiveTo}</Typography>
               </Stack>
             </Paper>

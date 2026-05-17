@@ -17,6 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,7 +67,7 @@ class QuoteAndBindIT {
         QuoteResponse quoteResponse = objectMapper.readValue(
                 quoteResult.getResponse().getContentAsString(), QuoteResponse.class);
 
-        assertThat(quoteResponse.getPremium()).isEqualTo(550.0);
+        assertThat(quoteResponse.getPremium()).isEqualByComparingTo(new BigDecimal("550.00"));
         String quoteId = quoteResponse.getQuoteId();
 
         BindRequest bindRequest = new BindRequest(quoteId);
@@ -82,7 +83,7 @@ class QuoteAndBindIT {
 
         assertThat(policy.getPolicyId()).isNotNull();
         assertThat(policy.getQuoteId()).isEqualTo(quoteId);
-        assertThat(policy.getPremium()).isEqualTo(550.0);
+        assertThat(policy.getPremium()).isEqualByComparingTo(new BigDecimal("550.00"));
         assertThat(policy.getEffectiveFrom()).isEqualTo(LocalDate.now());
         assertThat(policy.getEffectiveTo()).isEqualTo(LocalDate.now().plusDays(365));
 
@@ -96,5 +97,48 @@ class QuoteAndBindIT {
                 getResult.getResponse().getContentAsString(), Policy.class);
 
         assertThat(fetched.getPolicyId()).isEqualTo(policyId);
+    }
+
+    @Test
+    void bindIsIdempotent_secondCallReturns200WithSamePolicy() throws Exception {
+        QuoteRequest quoteRequest = new QuoteRequest(
+                "Alex Driver",
+                LocalDate.now().minusYears(30),
+                "DRIVE701054AB9XY",
+                "E14 5AB",
+                "AB12 CDE"
+        );
+
+        MvcResult quoteResult = mockMvc.perform(post("/api/quotes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(quoteRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String quoteId = objectMapper.readValue(
+                quoteResult.getResponse().getContentAsString(), QuoteResponse.class).getQuoteId();
+
+        BindRequest bindRequest = new BindRequest(quoteId);
+
+        MvcResult firstBind = mockMvc.perform(post("/api/policies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bindRequest)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        Policy firstPolicy = objectMapper.readValue(
+                firstBind.getResponse().getContentAsString(), Policy.class);
+
+        MvcResult secondBind = mockMvc.perform(post("/api/policies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bindRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Policy secondPolicy = objectMapper.readValue(
+                secondBind.getResponse().getContentAsString(), Policy.class);
+
+        assertThat(secondPolicy.getPolicyId()).isEqualTo(firstPolicy.getPolicyId());
+        assertThat(policyRepository.findAll()).hasSize(1);
     }
 }

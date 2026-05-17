@@ -40,7 +40,7 @@ public class QuoteService {
 
         QuoteResponse response = new QuoteResponse();
         response.setQuoteId(saved.getId());
-        response.setPremium(saved.getPremium().doubleValue());
+        response.setPremium(saved.getPremium());
         return response;
     }
 }

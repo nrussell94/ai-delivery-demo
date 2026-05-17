@@ -4,6 +4,7 @@ import com.example.demo.exception.EligibilityException;
 import com.example.demo.repository.SupportedPostcodeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -11,13 +12,20 @@ import java.time.Period;
 public class EligibilityService {
 
     private final SupportedPostcodeRepository supportedPostcodeRepository;
+    private final Clock clock;
 
-    public EligibilityService(SupportedPostcodeRepository supportedPostcodeRepository) {
+    public EligibilityService(SupportedPostcodeRepository supportedPostcodeRepository, Clock clock) {
         this.supportedPostcodeRepository = supportedPostcodeRepository;
+        this.clock = clock;
     }
 
     public void check(LocalDate dateOfBirth, String postcode) {
-        int age = Period.between(dateOfBirth, LocalDate.now()).getYears();
+        LocalDate today = LocalDate.now(clock);
+        if (dateOfBirth.isAfter(today)) {
+            throw new EligibilityException("Date of birth must be in the past");
+        }
+
+        int age = Period.between(dateOfBirth, today).getYears();
         if (age < 21) {
             throw new EligibilityException("Driver must be at least 21 years old");
         }

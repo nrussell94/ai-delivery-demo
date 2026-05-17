@@ -4,16 +4,23 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
 
 @Service
 public class RatingService {
 
+    private final Clock clock;
+
+    public RatingService(Clock clock) {
+        this.clock = clock;
+    }
+
     public BigDecimal price(LocalDate dateOfBirth, String postcode) {
         BigDecimal base = new BigDecimal("500");
 
-        int age = Period.between(dateOfBirth, LocalDate.now()).getYears();
+        int age = Period.between(dateOfBirth, LocalDate.now(clock)).getYears();
         BigDecimal ageFactor;
         if (age <= 25) {
             ageFactor = new BigDecimal("1.4");
