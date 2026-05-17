@@ -81,6 +81,7 @@ npm test                     # Playwright; expects full stack running on :5173
 - **Tests skip Docker in Maven build**: the `backend/Dockerfile` runs `mvn package -DskipTests`. Run `mvn verify` locally when you need backend integration test coverage.
 - **Backend integration tests**: name files `*IT.java` (Failsafe convention). `exec-maven-plugin` in `pom.xml` runs `docker run mongo:7 -p 27018:27017` in `pre-integration-test` and `docker rm -f` in `post-integration-test`. Tests use `@TestPropertySource(properties = "spring.data.mongodb.uri=mongodb://localhost:27018/test")`. Do **not** use `@Testcontainers` / `@Container` — docker-java is broken on this machine's Docker Desktop named-pipe relay; shelling out to the docker CLI sidesteps it.
 - **OpenAPI generator config** (in `pom.xml`): `interfaceOnly=true`, `useTags=true` — controllers implement tag-named interfaces (e.g., tag `health` → `HealthApi`).
+- **PR screenshots are dropped pre-merge.** Phase 9 of `/deliver` commits UI screenshots to `screenshots/<branch>/` on the PR branch so reviewers see visual evidence inline in the PR description. Before merging, run `git rm -rf screenshots/<branch>/ && git commit -m "Pre-merge: drop PR screenshots"`. Closed-without-merge PRs need no cleanup — branch deletion takes the screenshots with it.
 
 ## Known environmental quirks
 
