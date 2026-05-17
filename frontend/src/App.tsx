@@ -2,6 +2,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getHealth } from './api';
+import QuoteAndBindWizard from './QuoteAndBindWizard';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -64,6 +65,8 @@ export default function App() {
               )}
             </Stack>
           </Paper>
+
+          <QuoteAndBindWizard />
         </Stack>
       </Container>
     </Box>

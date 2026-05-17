@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Demo API
-  version: 0.1.0
+  version: 0.2.0
 servers:
   - url: http://localhost:8080
 paths:
@@ -17,6 +17,87 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+  /api/quotes:
+    post:
+      tags:
+        - quotes
+      operationId: createQuote
+      summary: Create a quote for a driver and vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteRequest"
+      responses:
+        "200":
+          description: Quote issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteResponse"
+        "400":
+          description: Ineligible driver, postcode, or invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+  /api/policies:
+    post:
+      tags:
+        - policies
+      operationId: bindPolicy
+      summary: Bind an existing quote into a policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BindRequest"
+      responses:
+        "200":
+          description: Policy bound
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Policy"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          description: Quote not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+  /api/policies/{id}:
+    get:
+      tags:
+        - policies
+      operationId: getPolicy
+      summary: Retrieve a bound policy by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Policy"
+        "404":
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
 components:
   schemas:
     HealthResponse:
@@ -27,3 +108,88 @@ components:
         status:
           type: string
           example: ok
+    MessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Driver must be 21 or older
+    QuoteRequest:
+      type: object
+      required:
+        - name
+        - dateOfBirth
+        - driverLicenceNumber
+        - postcode
+        - vehicleRegistration
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: Alex Driver
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1995-03-01"
+        driverLicenceNumber:
+          type: string
+          minLength: 1
+          example: AB1234567
+        postcode:
+          type: string
+          minLength: 1
+          example: E1 7AA
+        vehicleRegistration:
+          type: string
+          minLength: 1
+          example: AB12 CDE
+    QuoteResponse:
+      type: object
+      required:
+        - quoteId
+        - premium
+      properties:
+        quoteId:
+          type: string
+          example: 4f3a2c1b-8d7e-4f6a-9b0c-1d2e3f4a5b6c
+        premium:
+          type: number
+          format: double
+          example: 550.00
+    BindRequest:
+      type: object
+      required:
+        - quoteId
+      properties:
+        quoteId:
+          type: string
+          example: 4f3a2c1b-8d7e-4f6a-9b0c-1d2e3f4a5b6c
+    Policy:
+      type: object
+      required:
+        - policyId
+        - quoteId
+        - premium
+        - effectiveFrom
+        - effectiveTo
+      properties:
+        policyId:
+          type: string
+          example: 9e8d7c6b-5a4f-3e2d-1c0b-9a8b7c6d5e4f
+        quoteId:
+          type: string
+          example: 4f3a2c1b-8d7e-4f6a-9b0c-1d2e3f4a5b6c
+        premium:
+          type: number
+          format: double
+          example: 550.00
+        effectiveFrom:
+          type: string
+          format: date-time
+          example: "2026-05-17T12:00:00Z"
+        effectiveTo:
+          type: string
+          format: date-time
+          example: "2027-05-17T12:00:00Z"
