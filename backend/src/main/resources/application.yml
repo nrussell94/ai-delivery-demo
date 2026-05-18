@@ -1,8 +1,14 @@
 spring:
   application:
     name: demo-backend
-  data:
-    mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/demo}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:./data/demo.db}
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
 server:
   port: ${SERVER_PORT:8080}
+openweather:
+  api-key: ${OPENWEATHER_API_KEY:}
+  base-url: https://api.openweathermap.org/data/2.5

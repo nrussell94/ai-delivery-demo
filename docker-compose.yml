@@ -1,24 +1,16 @@
 services:
-  mongo:
-    image: mongo:7
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: demo
-    volumes:
-      - mongo-data:/data/db
-
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    depends_on:
-      - mongo
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/demo
+      SPRING_DATASOURCE_URL: jdbc:sqlite:/data/demo.db
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
       SERVER_PORT: 8080
     ports:
       - "8080:8080"
+    volumes:
+      - sqlite-data:/data
 
   frontend:
     build:
@@ -31,4 +23,4 @@ services:
       - "5173:5173"
 
 volumes:
-  mongo-data:
+  sqlite-data:
