@@ -7,9 +7,17 @@ const originalFetch = global.fetch;
 
 describe('App', () => {
   beforeEach(() => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ status: 'ok' })
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('/api/health')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ status: 'ok' })
+        } as Response);
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => []
+      } as Response);
     });
   });
 
@@ -20,7 +28,7 @@ describe('App', () => {
 
   it('shows the app title', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Demo App' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'FNOL Intake' })).toBeInTheDocument();
   });
 
   it('loads and displays backend health', async () => {
@@ -32,7 +40,13 @@ describe('App', () => {
     render(<App />);
     await screen.findByText('API status: ok');
 
+    const healthCallsBefore = (global.fetch as ReturnType<typeof vi.fn>).mock.calls
+      .filter(([url]) => typeof url === 'string' && url.includes('/api/health')).length;
+
     await userEvent.click(screen.getByRole('button', { name: /refresh/i }));
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+
+    const healthCallsAfter = (global.fetch as ReturnType<typeof vi.fn>).mock.calls
+      .filter(([url]) => typeof url === 'string' && url.includes('/api/health')).length;
+    expect(healthCallsAfter).toBe(healthCallsBefore + 1);
   });
 });

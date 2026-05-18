@@ -4,5 +4,6 @@ spring:
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/demo}
+      auto-index-creation: true
 server:
   port: ${SERVER_PORT:8080}

@@ -2,6 +2,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getHealth } from './api';
+import ClaimsWorkspace from './components/ClaimsWorkspace';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -32,14 +33,14 @@ export default function App() {
         <Stack spacing={3}>
           <Box>
             <Typography variant="h3" component="h1" fontWeight={700}>
-              Demo App
+              FNOL Intake
             </Typography>
             <Typography color="text.secondary">
-              Full-stack bootstrap (Spring Boot + React) ready for feature work.
+              Log a First-Notice-of-Loss while the caller is still on the line.
             </Typography>
           </Box>
 
-          {error && <Alert severity="error">{error}</Alert>}
+          <ClaimsWorkspace />
 
           <Paper sx={{ p: 3, borderRadius: 2 }}>
             <Stack spacing={2}>
@@ -51,6 +52,8 @@ export default function App() {
                   Refresh
                 </Button>
               </Stack>
+
+              {error && <Alert severity="error">{error}</Alert>}
 
               {loading && (
                 <Stack direction="row" spacing={1} alignItems="center">
