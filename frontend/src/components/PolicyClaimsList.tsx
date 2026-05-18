@@ -10,6 +10,8 @@ const INCIDENT_TYPE_LABELS: Record<IncidentType, string> = {
   OTHER: 'Other'
 };
 
+const POLICY_ID_DEBOUNCE_MS = 250;
+
 type Props = {
   policyId: string;
   refreshKey: number;
@@ -24,12 +26,19 @@ function formatIncidentAt(iso: string): string {
 }
 
 export default function PolicyClaimsList({ policyId, refreshKey }: Props) {
+  const [debouncedPolicyId, setDebouncedPolicyId] = useState(policyId);
   const [loading, setLoading] = useState(false);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!policyId) {
+    if (policyId === debouncedPolicyId) return;
+    const timeout = setTimeout(() => setDebouncedPolicyId(policyId), POLICY_ID_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [policyId, debouncedPolicyId]);
+
+  useEffect(() => {
+    if (!debouncedPolicyId) {
       setClaims([]);
       setError(null);
       return;
@@ -37,7 +46,7 @@ export default function PolicyClaimsList({ policyId, refreshKey }: Props) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    listClaims(policyId)
+    listClaims(debouncedPolicyId)
       .then((result) => {
         if (!cancelled) setClaims(result);
       })
@@ -50,7 +59,7 @@ export default function PolicyClaimsList({ policyId, refreshKey }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [policyId, refreshKey]);
+  }, [debouncedPolicyId, refreshKey]);
 
   if (!policyId) {
     return (
@@ -60,25 +69,28 @@ export default function PolicyClaimsList({ policyId, refreshKey }: Props) {
     );
   }
 
+  const debouncing = policyId !== debouncedPolicyId;
+  const busy = loading || debouncing;
+
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={1} alignItems="center">
         <Typography variant="h6" component="h3">
           Claims on file
         </Typography>
-        <Chip label={loading ? '…' : String(claims.length)} size="small" />
+        <Chip label={busy ? '…' : String(claims.length)} size="small" />
       </Stack>
 
       {error && <Alert severity="error">{error}</Alert>}
 
-      {loading && (
+      {busy && (
         <Stack direction="row" spacing={1} alignItems="center">
           <CircularProgress size={18} />
           <Typography>Loading…</Typography>
         </Stack>
       )}
 
-      {!loading && !error && claims.length === 0 && (
+      {!busy && !error && claims.length === 0 && (
         <Typography color="text.secondary">No claims logged for this policy yet.</Typography>
       )}
 

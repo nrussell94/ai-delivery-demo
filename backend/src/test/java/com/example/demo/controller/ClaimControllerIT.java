@@ -120,6 +120,26 @@ class ClaimControllerIT {
     }
 
     @Test
+    void postRejectsInvalidEnumValueWithFieldAwareMessage() throws Exception {
+        OffsetDateTime incidentAt = OffsetDateTime.now(ZoneOffset.UTC).minusHours(1);
+        String body = String.format(
+            "{\"policyId\":\"POL-3\",\"incidentAt\":\"%s\",\"incidentType\":\"BURGLARY\","
+                + "\"description\":\"Caller reports break-in\",\"reportedBy\":\"Sam Q\"}",
+            incidentAt
+        );
+
+        MvcResult result = mockMvc.perform(post("/api/claims")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+        String message = MAPPER.readTree(result.getResponse().getContentAsString())
+            .get("message").asText();
+        assertThat(message).contains("Incident type").contains("COLLISION");
+        assertThat(claimRepository.count()).isZero();
+    }
+
+    @Test
     void getReturnsNewestFirst() throws Exception {
         seedClaim("POL-A", "FNOL-AAAAAA01", Instant.parse("2026-05-18T07:00:00Z"));
         seedClaim("POL-A", "FNOL-AAAAAA02", Instant.parse("2026-05-18T08:00:00Z"));

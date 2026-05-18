@@ -4,6 +4,9 @@ spring:
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/demo}
-      auto-index-creation: true
+      # Default on for dev/IT so @Indexed annotations take effect at boot.
+      # Set SPRING_DATA_MONGODB_AUTO_INDEX_CREATION=false in production and
+      # manage indexes deliberately via IndexOperations or external migrations.
+      auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION:true}
 server:
   port: ${SERVER_PORT:8080}
